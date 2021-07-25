@@ -22,7 +22,7 @@ namespace api
 
         public void ConfigureDevelopmentServices(IServiceCollection services)
         {
-            services.AddDbContext<TransactionDbContext>(opt =>
+            services.AddDbContext<ITransactionDbContext, TransactionDbContext>(opt =>
                 opt.UseSqlite("Data Source=development.db"));
 
             services.AddSwaggerGen(c =>
@@ -53,7 +53,7 @@ namespace api
             string connectionString = Configuration.GetConnectionString("postgres");
 
             Console.WriteLine($"Connection string is: " + connectionString);
-            services.AddDbContext<TransactionDbContext>(opt =>
+            services.AddDbContext<ITransactionDbContext, TransactionDbContext>(opt =>
                 opt.UseNpgsql(connectionString));
             services.AddControllers();
         }

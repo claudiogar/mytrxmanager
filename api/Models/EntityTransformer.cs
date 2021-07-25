@@ -16,7 +16,7 @@ namespace api.Models
                 Currency = trx.Currency,
                 Date = trx.Date,
                 ProductType = (ProductType) Enum.Parse(typeof(ProductType), trx.ProductType),
-                Recipient = trx.Recipient.Trim()
+                Recipient = trx.Recipient?.Trim()
             };
         }
 

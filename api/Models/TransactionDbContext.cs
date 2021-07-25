@@ -6,7 +6,16 @@ using System.Threading.Tasks;
 
 namespace api.Models
 {
-    public class TransactionDbContext : DbContext
+    public interface ITransactionDbContext
+    {
+        Task<IEnumerable<TransactionDbModel>> GetTransactionsAsync(int? beforeId, int pageSize);
+        Task<TransactionDbModel> FindAsync(int id);
+        Task AddAsync(TransactionDbModel trx);
+        Task UpdateAsync(TransactionDbModel trx);
+        Task RemoveAsync(TransactionDbModel trx);
+    }
+
+    public class TransactionDbContext : DbContext, ITransactionDbContext
     {
         public DbSet<TransactionDbModel> Transactions { get; set; }
 
@@ -14,9 +23,35 @@ namespace api.Models
         {
         }
 
-        internal async Task<IEnumerable<TransactionDbModel>> GetTransactionsAsync(int? beforeId, int pageSize)
+        public async Task<IEnumerable<TransactionDbModel>> GetTransactionsAsync(int? beforeId, int pageSize)
         {
             return await Transactions.Where(e => !beforeId.HasValue || e.Id < beforeId).OrderByDescending(trx => trx.Id).Take(pageSize).ToListAsync();
+        }
+
+        public async Task<TransactionDbModel> FindAsync(int id)
+        {
+            return await Transactions.FindAsync(id);
+        }
+
+        public async Task AddAsync(TransactionDbModel trx)
+        {
+            await Transactions.AddAsync(trx);
+
+            await SaveChangesAsync();
+        }
+
+        public async Task RemoveAsync(TransactionDbModel trx)
+        {
+            Transactions.Remove(trx);
+
+            await SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(TransactionDbModel trx)
+        {
+            Entry(trx).State = EntityState.Modified;
+
+            await SaveChangesAsync();
         }
     }
 }

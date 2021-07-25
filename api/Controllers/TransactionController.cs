@@ -15,10 +15,10 @@ namespace api.Controllers
     [ApiController]
     public class TransactionController : ControllerBase
     {
-        private readonly TransactionDbContext _context;
+        private readonly ITransactionDbContext _context;
         private readonly ILogger _logger;
 
-        public TransactionController(TransactionDbContext context, ILogger<TransactionController> logger)
+        public TransactionController(ITransactionDbContext context, ILogger<TransactionController> logger)
         {
             _context = context;
             _logger = logger;
@@ -45,7 +45,7 @@ namespace api.Controllers
             }
 
 
-            var transaction = await _context.Transactions.FindAsync(id);
+            var transaction = await _context.FindAsync(id);
 
             if (transaction == null)
             {
@@ -73,16 +73,15 @@ namespace api.Controllers
 
             try
             {
-                _context.Entry(trx).State = EntityState.Modified;
-                _logger.LogInformation("TRX with id {trx_id} has been modified.", id);
+                await _context.UpdateAsync(trx);
 
-                await _context.SaveChangesAsync();
+                _logger.LogInformation("TRX with id {trx_id} has been modified.", id);
             }
             catch (DbUpdateConcurrencyException)
             {
                 _logger.LogWarning("TRX {trx_id} could not be altered due to a DB concurrency issue.");
 
-                if (!TransactionExists(id))
+                if (!await TransactionExists(id))
                 {
                     return NotFound();
                 }
@@ -100,28 +99,20 @@ namespace api.Controllers
         [HttpPost]
         public async Task<ActionResult<TransactionApiModel>> PostTransaction(TransactionApiModel transaction)
         {
-            try
-            {
-                TransactionDbModel trx = transaction.ToDbModel();
+            TransactionDbModel trx = transaction.ToDbModel();
 
-                _context.Transactions.Add(trx);
-                await _context.SaveChangesAsync();
+            await _context.AddAsync(trx);
 
-                _logger.LogInformation("TRX with id {trx_id} has been created.", trx.Id);
+            _logger.LogInformation("TRX with id {trx_id} has been created.", trx.Id);
 
-                return CreatedAtAction("GetTransaction", new { id = trx.Id }, trx.ToApiModel());
-            }
-            catch(ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return CreatedAtAction("GetTransaction", new { id = trx.Id }, trx.ToApiModel());
         }
 
         // DELETE: api/Transaction/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTransaction(int id)
+        public async Task<ActionResult> DeleteTransaction(int id)
         {
-            TransactionDbModel transaction = await _context.Transactions.FindAsync(id);
+            TransactionDbModel transaction = await _context.FindAsync(id);
             if (transaction == null)
             {
                 _logger.LogWarning("An attempt to delete TRX {trx_id}, which does not exist, has been made.",id);
@@ -129,17 +120,16 @@ namespace api.Controllers
                 return NotFound();
             }
 
-            _context.Transactions.Remove(transaction);
-            await _context.SaveChangesAsync();
+            await _context.RemoveAsync(transaction);
 
             _logger.LogInformation("TRX {trx_id} has been deleted.", id);
 
             return NoContent();
         }
 
-        private bool TransactionExists(int id)
+        private async Task<bool> TransactionExists(int id)
         {
-            return _context.Transactions.Any(e => e.Id == id);
+            return await _context.FindAsync(id) != null;
         }
     }
 }
