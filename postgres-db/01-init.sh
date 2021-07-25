@@ -10,5 +10,6 @@ EOSQL
 psql -d ${APP_DB_NAME} -f "/initializators/02-migrations.sql"
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$APP_DB_NAME" <<-EOSQL
+  GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO $APP_DB_USER;
   GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO $APP_DB_USER;
 EOSQL
