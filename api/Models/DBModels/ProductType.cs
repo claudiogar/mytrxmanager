@@ -1,4 +1,4 @@
-﻿namespace api.Models
+﻿namespace api.Models.DbModels
 {
     public enum ProductType
     {

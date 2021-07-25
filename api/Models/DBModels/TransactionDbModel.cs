@@ -1,7 +1,7 @@
 ﻿using System;
-namespace api.Models
+namespace api.Models.DbModels
 {
-    public class Transaction
+    public class TransactionDbModel
     {
         public int Id { get; set; }
         public DateTime Date { get; set; }
@@ -10,7 +10,7 @@ namespace api.Models
         public string Currency { get; set; }
         public ProductType ProductType { get; set; }
 
-        public Transaction()
+        public TransactionDbModel()
         {
         }
     }
