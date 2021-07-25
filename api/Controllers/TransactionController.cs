@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using api.Models;
 using api.Models.ApiModels;
+using System;
+using api.Models.DbModels;
 
 namespace api.Controllers
 {
@@ -19,17 +21,24 @@ namespace api.Controllers
             _context = context;
         }
 
-        // GET: api/Transaction
+        // GET: api/Transaction?beforeId=1&pageSize=10
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TransactionApiModel>>> GetTransactions()
+        public async Task<ActionResult<IEnumerable<TransactionApiModel>>> GetTransactions([FromQuery] GetQueryParameters queryParameters)
         {
-            return await _context.Transactions.Select(trx => trx.ToApiModel()).ToListAsync();
+            return (await _context.GetTransactionsAsync(queryParameters.BeforeId, queryParameters.Limit)).Select(trx => trx.ToApiModel()).ToList();
         }
 
         // GET: api/Transaction/5
         [HttpGet("{id}")]
         public async Task<ActionResult<TransactionApiModel>> GetTransaction(int id)
         {
+            if (id < 0)
+            {
+                ModelState.AddModelError(nameof(id), "id should be a positive value!");
+                return BadRequest(ModelState);
+            }
+
+
             var transaction = await _context.Transactions.FindAsync(id);
 
             if (transaction == null)
@@ -47,13 +56,24 @@ namespace api.Controllers
         {
             if (id != transaction.Id)
             {
-                return BadRequest();
+                ModelState.AddModelError(nameof(id), "id parameter and model id do not match!");
+
+                return BadRequest(ModelState);
             }
 
-            _context.Entry(transaction).State = EntityState.Modified;
+            TransactionDbModel trx;
+            try
+            {
+                trx = transaction.ToDbModel();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
             try
             {
+                _context.Entry(trx).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
@@ -76,17 +96,26 @@ namespace api.Controllers
         [HttpPost]
         public async Task<ActionResult<TransactionApiModel>> PostTransaction(TransactionApiModel transaction)
         {
-            _context.Transactions.Add(transaction.ToDbModel());
-            await _context.SaveChangesAsync();
+            try
+            {
+                TransactionDbModel trx = transaction.ToDbModel();
 
-            return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);
+                _context.Transactions.Add(trx);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction("GetTransaction", new { id = trx.Id }, trx.ToApiModel());
+            }
+            catch(ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // DELETE: api/Transaction/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTransaction(int id)
         {
-            var transaction = await _context.Transactions.FindAsync(id);
+            TransactionDbModel transaction = await _context.Transactions.FindAsync(id);
             if (transaction == null)
             {
                 return NotFound();

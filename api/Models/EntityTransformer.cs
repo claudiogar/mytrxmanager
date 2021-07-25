@@ -1,24 +1,12 @@
 ﻿
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using api.Models.ApiModels;
 using api.Models.DbModels;
 
 namespace api.Models
 {
-
-    public static class EntityTransformer
+    internal static class EntityTransformer
     {
-        private static IReadOnlyDictionary<string, ProductType> ProductTypesMap = InitializeProductTypesMap();
-
-        private static IReadOnlyDictionary<string, ProductType> InitializeProductTypesMap()
-        {
-            ProductType[] productTypes = Enum.GetValues<ProductType>();
-
-            return productTypes.ToDictionary(p => Enum.GetName(p), p => p);
-        }
-
         public static TransactionDbModel ToDbModel(this TransactionApiModel trx)
         {
             return new TransactionDbModel
@@ -27,8 +15,8 @@ namespace api.Models
                 Amount = trx.Amount,
                 Currency = trx.Currency,
                 Date = trx.Date,
-                ProductType = ProductTypesMap[trx.ProductType],
-                Recipient = trx.Recipient
+                ProductType = (ProductType) Enum.Parse(typeof(ProductType), trx.ProductType),
+                Recipient = trx.Recipient.Trim()
             };
         }
 
