@@ -1,3 +1,4 @@
+using System;
 using api.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -49,8 +50,11 @@ namespace api
 
         public void ConfigureServices(IServiceCollection services)
         {
+            string connectionString = Configuration.GetConnectionString("postgres");
+
+            Console.WriteLine($"Connection string is: " + connectionString);
             services.AddDbContext<TransactionDbContext>(opt =>
-                opt.UseNpgsql(Configuration.GetValue<string>("ConnectionString")));
+                opt.UseNpgsql(connectionString));
             services.AddControllers();
         }
 

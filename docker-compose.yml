@@ -5,7 +5,7 @@ services:
         environment:
             - ASPNETCORE_ENVIRONMENT="production"
             - ASPNETCORE_URLS=http://+:1234
-            - ConnectionString="User ID=vontobel;Password=My_Str0ng_P4ssw0rd;Server=db;Port=5432;Database=my_database;Integrated Security=true;Pooling=true;"
+            - ConnectionStrings:postgres=Username=vontobel;Password=My_Str0ng_P4ssw0rd;Host=db;Port=5432;Database=my_database;
         expose:
             - "1234"
         ports:
