@@ -40,7 +40,7 @@ services:
             PGADMIN_DEFAULT_PASSWORD: admin
             PGADMIN_CONFIG_SERVER_MODE: 'False'
         volumes:
-            - ./pgadmin:/root/.pgadmin
+            - ./pgadmin:/pgadmin/config
         ports:
             - "5050:5050"
         networks:
