@@ -1,0 +1,56 @@
+version: "3.9"
+services:
+    api:
+        build: ./api
+        environment:
+            - ASPNETCORE_ENVIRONMENT="production"
+            - ASPNETCORE_URLS=http://+:1234
+            - ConnectionString="User ID=vontobel;Password=My_Str0ng_P4ssw0rd;Server=db;Port=5432;Database=my_database;Integrated Security=true;Pooling=true;"
+        expose:
+            - "1234"
+        ports:
+            - "1234:1234"
+        depends_on:
+            - db
+        networks:
+            - app-tier
+    db:
+        build: ./postgres-db
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: "My_Str0ng_P4ssw0rd"
+            POSTGRES_DB: "postgres"
+            APP_DB_USER: vontobel
+            APP_DB_NAME: my_database
+            APP_DB_PASS: My_Str0ng_P4ssw0rd
+        restart: unless-stopped
+        volumes:
+            - postgres:/var/lib/postgresql/data
+        networks:
+            - app-tier
+        ports:
+            - "5432:5432"
+    pgadmin:
+        container_name: pgadmin_container
+        image: biarms/pgadmin4
+        depends_on:
+            - db
+        environment:
+            PGADMIN_DEFAULT_EMAIL: gargiulo.claudio@gmail.com
+            PGADMIN_DEFAULT_PASSWORD: admin
+            PGADMIN_CONFIG_SERVER_MODE: 'False'
+        volumes:
+            - ./pgadmin:/root/.pgadmin
+        ports:
+            - "5050:5050"
+        networks:
+        - app-tier
+        restart: unless-stopped
+          
+networks:
+    app-tier:
+        driver: bridge
+
+volumes:
+    postgres:
+    
