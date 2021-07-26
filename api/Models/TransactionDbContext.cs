@@ -8,7 +8,8 @@ namespace api.Models
 {
     public interface ITransactionDbContext
     {
-        Task<IEnumerable<TransactionDbModel>> GetTransactionsAsync(int? beforeId, int pageSize);
+        Task<IEnumerable<TransactionDbModel>> GetTransactionsBeforeIdAsync(int? beforeId, int pageSize);
+        Task<IEnumerable<TransactionDbModel>> GetTransactionsAfterIdAsync(int? afterId, int pageSize);
         Task<TransactionDbModel> FindAsync(int id);
         Task AddAsync(TransactionDbModel trx);
         Task UpdateAsync(TransactionDbModel trx);
@@ -23,9 +24,14 @@ namespace api.Models
         {
         }
 
-        public async Task<IEnumerable<TransactionDbModel>> GetTransactionsAsync(int? beforeId, int pageSize)
+        public async Task<IEnumerable<TransactionDbModel>> GetTransactionsBeforeIdAsync(int? beforeId, int pageSize)
         {
             return await Transactions.Where(e => !beforeId.HasValue || e.Id < beforeId).OrderByDescending(trx => trx.Id).Take(pageSize).ToListAsync();
+        }
+
+        public async Task<IEnumerable<TransactionDbModel>> GetTransactionsAfterIdAsync(int? afterId, int pageSize)
+        {
+            return await Transactions.Where(e => !afterId.HasValue || e.Id > afterId).OrderBy(trx => trx.Id).Take(pageSize).OrderByDescending(trx => trx.Id).ToListAsync();
         }
 
         public async Task<TransactionDbModel> FindAsync(int id)

@@ -29,7 +29,28 @@ namespace api.Controllers
         public async Task<ActionResult<IEnumerable<TransactionApiModel>>> GetTransactions([FromQuery] GetQueryParameters queryParameters)
         {
             _logger.LogTrace("{nr_transactions} have been requested.");
-            return (await _context.GetTransactionsAsync(queryParameters.BeforeId, queryParameters.Limit)).Select(trx => trx.ToApiModel()).ToList();
+
+            List<TransactionApiModel> transactions;
+
+            if (!queryParameters.StartingId.HasValue)
+            {
+                // No starting id specified. Take the most recent TRXs
+                transactions = (await _context.GetTransactionsBeforeIdAsync(queryParameters.StartingId, Math.Abs(queryParameters.Limit)).ConfigureAwait(false)).Select(trx => trx.ToApiModel()).ToList();
+            }
+            else
+            {
+                // Starting id specified. Depending on the Limit, take the ones before or after it.
+                if (queryParameters.Limit > 0)
+                {
+                    transactions = (await _context.GetTransactionsBeforeIdAsync(queryParameters.StartingId, queryParameters.Limit).ConfigureAwait(false)).Select(trx => trx.ToApiModel()).ToList();
+                }
+                else
+                {
+                    transactions = (await _context.GetTransactionsAfterIdAsync(queryParameters.StartingId, Math.Abs(queryParameters.Limit)).ConfigureAwait(false)).Select(trx => trx.ToApiModel()).ToList();
+                }
+            }
+
+            return new ActionResult<IEnumerable<TransactionApiModel>>(transactions);
         }
 
         // GET: api/Transaction/5

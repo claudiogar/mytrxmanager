@@ -9,9 +9,9 @@ namespace api.Controllers
         private int _limit = 10;
 
         [Range(maximum: int.MaxValue, minimum:0)]
-        public int? BeforeId { get; set; }
+        public int? StartingId { get; set; }
 
-        [Range(maximum: maxPageSize, minimum: 1)]
+        [Range(maximum: maxPageSize, minimum: -maxPageSize)]
         public int Limit
         {
             get

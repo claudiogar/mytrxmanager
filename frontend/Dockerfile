@@ -8,6 +8,8 @@ COPY ./vontobel-ui/package-lock.json ./
 RUN npm install
 RUN npm install react-scripts -g
 
+ENV REACT_APP_API_URL http://localhost:1234
+
 COPY ./vontobel-ui ./
 RUN npm run build
 

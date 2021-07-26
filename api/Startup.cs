@@ -11,6 +11,8 @@ namespace api
 {
     public class Startup
     {
+        private readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -22,6 +24,7 @@ namespace api
 
         public void ConfigureDevelopmentServices(IServiceCollection services)
         {
+            EnableCors(services);
             services.AddDbContext<ITransactionDbContext, TransactionDbContext>(opt =>
                 opt.UseSqlite("Data Source=development.db"));
 
@@ -39,6 +42,7 @@ namespace api
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "api v1"));
 
+            app.UseCors(MyAllowSpecificOrigins);
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
@@ -53,6 +57,7 @@ namespace api
             string connectionString = Configuration.GetConnectionString("postgres");
 
             Console.WriteLine($"Connection string is: " + connectionString);
+            EnableCors(services);
             services.AddDbContext<ITransactionDbContext, TransactionDbContext>(opt =>
                 opt.UseNpgsql(connectionString));
             services.AddControllers();
@@ -61,12 +66,25 @@ namespace api
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseRouting();
+            app.UseCors(MyAllowSpecificOrigins);
 
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+            });
+        }
+
+        private void EnableCors(IServiceCollection services)
+        {
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: MyAllowSpecificOrigins,
+                                  builder =>
+                                  {
+                                      builder.WithOrigins("*");
+                                  });
             });
         }
     }

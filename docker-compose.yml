@@ -1,5 +1,15 @@
 version: "3.9"
 services:
+    frontend:
+        build: ./frontend
+        environment:
+            - REACT_APP_API_URL=http://api:1234
+        expose:
+            - "80"
+        networks:
+            - frontendNetwork
+        ports:
+            - 80:80
     api:
         build: ./api
         environment:
@@ -13,6 +23,7 @@ services:
         depends_on:
             - db
         networks:
+            - frontendNetwork
             - app-tier
     db:
         build: ./postgres-db
@@ -50,7 +61,8 @@ services:
 networks:
     app-tier:
         driver: bridge
+    frontendNetwork:
+        driver: bridge
 
 volumes:
     postgres:
-    

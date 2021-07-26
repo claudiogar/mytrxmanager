@@ -24,7 +24,7 @@ namespace apiTests
             var response = await controller.GetTransactions(new GetQueryParameters());
 
             // assert
-            A.CallTo(() => repo.GetTransactionsAsync(null, 10)).MustHaveHappened();
+            A.CallTo(() => repo.GetTransactionsBeforeIdAsync(null, 10)).MustHaveHappened();
             Assert.NotNull(response);
         }
 

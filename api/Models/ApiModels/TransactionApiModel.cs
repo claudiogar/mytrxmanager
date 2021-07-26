@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using api.Models.DbModels;
 using api.Utilities;
@@ -33,5 +34,13 @@ namespace api.Models.ApiModels
         public TransactionApiModel()
         {
         }
+    }
+
+    public class GetTransactionsResponseMessage
+    {
+        public string PreviousPageUrl { get; set; }
+        public string NextPageUrl { get; set; }
+
+        public IEnumerable<TransactionApiModel> Transactions { get; set; } = new List<TransactionApiModel>();
     }
 }
