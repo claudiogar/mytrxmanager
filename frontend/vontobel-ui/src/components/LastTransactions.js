@@ -11,7 +11,7 @@ export const LastTransactions = props => {
         refresh: props.refreshCount
     });
 
-    const fetchRecords = async (trxId, limit) => {
+    const fetchRecords = async (trxId, limit, noPageChange) => {
         updateState({...state, loading: 'started'});
 
         try{
@@ -31,10 +31,12 @@ export const LastTransactions = props => {
             if(newRecords.length == 0) return; // nothing to do. We reached the boundary.
     
             var newPageIndex = state.pageIndex;
-            if(trxId){
-                newPageIndex = limit > 0 ? state.pageIndex + 1 : state.pageIndex -1
-            }else{
-                newPageIndex = 1
+            if(!noPageChange){
+                if(trxId){
+                    newPageIndex = limit > 0 ? state.pageIndex + 1 : state.pageIndex -1
+                }else{
+                    newPageIndex = 1
+                }    
             }
     
             updateState({...state, records: newRecords, loading: 'notStarted', pageIndex: newPageIndex});
@@ -57,7 +59,7 @@ export const LastTransactions = props => {
             body: formData
         }).then(res => {
             var maxId = state.records[0].id+1
-            fetchRecords(maxId, state.pageLength)
+            fetchRecords(maxId, state.pageLength, true)
         });
     }
 
