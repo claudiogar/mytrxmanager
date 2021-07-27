@@ -1,18 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Header } from './components/Header';
 import { LastTransactions } from './components/LastTransactions';
 import { TransactionAdder } from './components/TransactionAdder';
 
 function App() {
-  const submitTransaction = trx => {
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(trx)
-  };
-  fetch(process.env.REACT_APP_API_URL+'/api/transaction', requestOptions)
-      .then(response => response.json())
 
+  const [state, updateState] = useState({
+    refreshCount: 0
+  })
+
+  const onSubmittedTransaction = () => {
+    updateState({...state, refreshCount: state.refreshCount+1})
   }
 
   return (
@@ -21,10 +19,10 @@ function App() {
       <div className="container-fluid">
         <div className='row'>
           <div className='col-8'>
-            <LastTransactions />
+            <LastTransactions refreshCount={state.refreshCount}/>
           </div>
           <div className='col-4'>
-            <TransactionAdder onSubmit={submitTransaction}/>
+            <TransactionAdder onSubmittedTransaction={onSubmittedTransaction}/>
           </div>
         </div>
       </div>

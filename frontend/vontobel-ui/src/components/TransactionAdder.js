@@ -10,6 +10,7 @@ export const TransactionAdder = props => {
         errors: []
     })
 
+    
     const hasError = name => {
         return state.errors.indexOf(name)>= 0
     }
@@ -17,12 +18,21 @@ export const TransactionAdder = props => {
     const submitForm = e => {
         e.preventDefault()
         if(state.errors.length == 0){
-            props.onSubmit({
+            var trx = {
                 productType: state.productType,
                 amount: state.amount,
                 currency: state.currency,
                 recipient: state.recipient
-            })
+            }
+
+            const requestOptions = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(trx)
+            };
+            fetch(process.env.REACT_APP_API_URL+'/api/transaction', requestOptions)
+                .then(response => response.json())
+                .then(() => props.onSubmittedTransaction());
         }
     }
 

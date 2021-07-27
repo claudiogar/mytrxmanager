@@ -3,10 +3,11 @@ import { Button, ButtonGroup } from 'react-bootstrap'
 
 export const LastTransactions = props => {
     var [state, updateState] = useState({
-        pageIndex: 0,
+        pageIndex: 1,
         pageLength: 10,
         records: [],
-        loading: 'notStarted'
+        loading: 'notStarted',
+        refresh: props.refreshCount
     });
 
     const fetchRecords = async (trxId, limit) => {
@@ -28,7 +29,12 @@ export const LastTransactions = props => {
     
             if(newRecords.length == 0) return; // nothing to do. We reached the boundary.
     
-            var newPageIndex = limit > 0 ? state.pageIndex + 1 : state.pageIndex -1
+            var newPageIndex = state.pageIndex;
+            if(trxId){
+                newPageIndex = limit > 0 ? state.pageIndex + 1 : state.pageIndex -1
+            }else{
+                newPageIndex = 1
+            }
     
             updateState({...state, records: newRecords, loading: 'notStarted', pageIndex: newPageIndex});
 
@@ -52,7 +58,7 @@ export const LastTransactions = props => {
         if(state.loading == 'notStarted'){
             fetchRecords(null, state.pageLength)
         }
-    }, []);
+    }, [props.refreshCount]);
 
     return <React.Fragment>
         <div className="text-left">
