@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Button, ButtonGroup } from 'react-bootstrap'
-import { TrashFill } from 'react-bootstrap-icons'
+import { PencilFill, TrashFill } from 'react-bootstrap-icons'
+import { TransactionEditModal } from './TransactionEditor'
 
 export const LastTransactions = props => {
     var [state, updateState] = useState({
@@ -8,7 +9,10 @@ export const LastTransactions = props => {
         pageLength: 10,
         records: [],
         loading: 'notStarted',
-        refresh: props.refreshCount
+        refresh: props.refreshCount,
+        editor: {
+            transaction: null
+        }
     });
 
     const fetchRecords = async (trxId, limit, noPageChange) => {
@@ -46,6 +50,36 @@ export const LastTransactions = props => {
         }
     }
 
+    const openEditor = e => {
+        var trxId = e.currentTarget.attributes['trxid'].value
+        if(!trxId) return;
+
+        var editor = {...state.editor}
+        editor.transaction = state.records.find(r => r.id == trxId)
+        updateState({...state, editor:editor})
+    }
+
+    const closeTransactionEditor = () => {
+        var editor = {...state.editor}
+        editor.transaction = null
+        updateState({...state, editor:editor})
+    }
+
+    const saveTransaction = trx => {
+        var index = state.records.findIndex(r => r.id == trx.id)
+        if(index >= 0){
+            var oldTransaction = state.records[index]
+            var newTransactions = [...state.records]
+
+            trx.date = oldTransaction.date
+            newTransactions[index] = trx
+
+            var newEditor = state.editor
+            newEditor.transaction = null
+            updateState({...state, records: newTransactions, editor: newEditor})
+        }
+    }
+
     const deleteTransaction = async e => {
         var trxId = e.currentTarget.attributes['trxid'].value
         if(!trxId) return;
@@ -80,7 +114,13 @@ export const LastTransactions = props => {
         }
     }, [props.refreshCount]);
 
+
     return <React.Fragment>
+        <TransactionEditModal
+        transaction={state.editor.transaction}
+        onClose={closeTransactionEditor}
+        onSave={saveTransaction}
+        />
         <div className="text-left">
           <span className="h4">Most recent transactions</span>
         </div>
@@ -107,10 +147,17 @@ export const LastTransactions = props => {
                             <td>{record.currency}</td>
                             <td>{record.recipient}</td>
                             <td>{
-                                <Button trxid={record.id} className="btn-sm btn-light"
+                                <ButtonGroup>
+                                    <Button trxid={record.id} className="btn-sm btn-light"
+                            onClick={openEditor}>
+                                <PencilFill />
+                            </Button>
+                            <Button trxid={record.id} className="btn-sm btn-light"
                             onClick={deleteTransaction}>
                                 <TrashFill />
-                            </Button>}
+                            </Button>
+                                </ButtonGroup>
+}
                             </td>
                         </tr>
                     </React.Fragment>
