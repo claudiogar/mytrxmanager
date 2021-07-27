@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Button, ButtonGroup, ButtonToolbar } from 'react-bootstrap'
+import { Button, ButtonGroup } from 'react-bootstrap'
 
 export const LastTransactions = props => {
     var [state, updateState] = useState({

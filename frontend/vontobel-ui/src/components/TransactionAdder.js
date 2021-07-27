@@ -4,16 +4,28 @@ export const TransactionAdder = props => {
 
     const [state, updateState] = useState({
         productType: 'Food',
-        amount: '0',
+        amount: '',
         currency: 'CHF',
         recipient: '',
-        errors: [],
-        validating: false
+        errors: []
     })
 
     const hasError = name => {
         return state.errors.indexOf(name)>= 0
     }
+
+    const submitForm = e => {
+        e.preventDefault()
+        if(state.errors.length == 0){
+            props.onSubmit({
+                productType: state.productType,
+                amount: state.amount,
+                currency: state.currency,
+                recipient: state.recipient
+            })
+        }
+    }
+
     const validate = () => {
         var errors = []
         if(!state.productType){
@@ -35,8 +47,8 @@ export const TransactionAdder = props => {
             var i = 0;
             for(i=0; i < errors.length; i++){
                 if(errors[i] != state.errors[i]){
-                    errorsChanged = true;
-                    break;
+                    errorsChanged = true
+                    break
                 }
             }
         }
@@ -51,8 +63,8 @@ export const TransactionAdder = props => {
     })
 
     const handleInputChange =(event) => {
-        var key = event.target.id;
-        var value = event.target.value;
+        var key = event.target.id
+        var value = event.target.value
         updateState({...state, [key]: value})
         validate()
       }
@@ -116,8 +128,14 @@ export const TransactionAdder = props => {
                     onChange={handleInputChange}
                     required/>
                 </div>
+                <br/>
                 <div className="form-group">
-                    <button type="submit" className="btn btn-primary">Submit</button>
+                    <button
+                    type="submit"
+                    className="btn btn-primary"
+                    onClick={submitForm}
+                    disabled={state.errors.length > 0}
+                    >Submit</button>
                 </div>
                 </form>
             </div>

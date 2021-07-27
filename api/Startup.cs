@@ -83,7 +83,7 @@ namespace api
                 options.AddPolicy(name: MyAllowSpecificOrigins,
                                   builder =>
                                   {
-                                      builder.WithOrigins("*");
+                                      builder.AllowAnyOrigin().AllowAnyHeader();
                                   });
             });
         }

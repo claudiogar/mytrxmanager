@@ -10,8 +10,7 @@ namespace api.Models.ApiModels
     {
         public int Id { get; set; }
 
-        [Required]
-        public DateTime Date { get; set; }
+        public DateTime Date { get; set; } = DateTime.UtcNow;
 
         [Required]
         [Range(0, double.MaxValue)]
