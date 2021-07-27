@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Button, ButtonGroup } from 'react-bootstrap'
+import { TrashFill } from 'react-bootstrap-icons'
 
 export const LastTransactions = props => {
     var [state, updateState] = useState({
@@ -43,6 +44,23 @@ export const LastTransactions = props => {
         }
     }
 
+    const deleteTransaction = async e => {
+        var trxId = e.currentTarget.attributes['trxid'].value
+        if(!trxId) return;
+
+        const formData = new FormData();
+        formData.append('id', trxId);
+    
+        var url = process.env.REACT_APP_API_URL+'/api/transaction/'+trxId;
+        const res = await fetch(url, { 
+            method: 'DELETE',
+            body: formData
+        }).then(res => {
+            var maxId = state.records[0].id+1
+            fetchRecords(maxId, state.pageLength)
+        });
+    }
+
     const goPreviousPage = () => {
         var firstId = Math.max(...state.records.map(r => r.id))
         fetchRecords(firstId, -1 * state.pageLength)
@@ -73,6 +91,7 @@ export const LastTransactions = props => {
               <th scope="col">Amount</th>
               <th scope="col">Currency</th>
               <th scope="col">Recipient</th>
+              <th scope="col"></th>
             </tr>
           </thead>
           <tbody>
@@ -85,6 +104,12 @@ export const LastTransactions = props => {
                             <td>{record.amount}</td>
                             <td>{record.currency}</td>
                             <td>{record.recipient}</td>
+                            <td>{
+                                <Button trxid={record.id} className="btn-sm btn-light"
+                            onClick={deleteTransaction}>
+                                <TrashFill />
+                            </Button>}
+                            </td>
                         </tr>
                     </React.Fragment>
                 ))}

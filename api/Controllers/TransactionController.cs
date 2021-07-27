@@ -129,7 +129,7 @@ namespace api.Controllers
             return CreatedAtAction("GetTransaction", new { id = trx.Id }, trx.ToApiModel());
         }
 
-        // DELETE: api/Transaction/5
+        // DELETE: api/Transaction/5/delete
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteTransaction(int id)
         {
