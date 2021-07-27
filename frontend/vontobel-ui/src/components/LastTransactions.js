@@ -55,7 +55,6 @@ export const LastTransactions = props => {
     }, []);
 
     return <React.Fragment>
-        <hr/>
         <div className="text-left">
           <span className="h4">Most recent transactions</span>
         </div>
